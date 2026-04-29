@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 interface IBanner {
   _id: string;
@@ -27,8 +28,8 @@ export default function BannersPage() {
 
   const fetchBanners = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/banners');
-      const data = await res.json();
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/banners`);
+      const data = res.data;
       if (data.success) {
         setBanners(data.data);
       }
@@ -75,20 +76,21 @@ export default function BannersPage() {
 
     try {
       const url = editingId 
-        ? `http://localhost:5000/api/v1/banners/${editingId}` 
-        : 'http://localhost:5000/api/v1/banners';
-      const method = editingId ? 'PUT' : 'POST';
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/banners/${editingId}` 
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/banners`;
+      const method = editingId ? 'put' : 'post';
 
-      const res = await fetch(url, {
+      const res = await axios({
         method,
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(bannerData)
+        data: bannerData
       });
       
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success(editingId ? 'Banner updated successfully' : 'Banner created successfully');
         handleClosePanel();
@@ -113,11 +115,10 @@ export default function BannersPage() {
     setDeleting(true);
     const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/banners/${deleteModal.bannerId}`, {
-        method: 'DELETE',
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/banners/${deleteModal.bannerId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success('Banner deleted successfully');
         fetchBanners();

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 interface ICoupon {
   _id: string;
@@ -40,8 +41,8 @@ export default function CouponsPage() {
 
   const fetchCoupons = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/coupons');
-      const data = await res.json();
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/coupons`);
+      const data = res.data;
       if (data.success) {
         setCoupons(data.data);
       }
@@ -54,8 +55,8 @@ export default function CouponsPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/products');
-      const data = await res.json();
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/products`);
+      const data = res.data;
       if (data.success) {
         setProducts(data.data);
       }
@@ -125,20 +126,21 @@ export default function CouponsPage() {
 
     try {
       const url = editingId 
-        ? `http://localhost:5000/api/v1/coupons/${editingId}` 
-        : 'http://localhost:5000/api/v1/coupons';
-      const method = editingId ? 'PUT' : 'POST';
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/coupons/${editingId}` 
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/coupons`;
+      const method = editingId ? 'put' : 'post';
 
-      const res = await fetch(url, {
+      const res = await axios({
         method,
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(couponData)
+        data: couponData
       });
       
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success(editingId ? 'Coupon updated successfully' : 'Coupon created successfully');
         handleClosePanel();
@@ -163,11 +165,10 @@ export default function CouponsPage() {
     setDeleting(true);
     const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/coupons/${deleteModal.couponId}`, {
-        method: 'DELETE',
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/coupons/${deleteModal.couponId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success('Coupon deleted successfully');
         fetchCoupons();

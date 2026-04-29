@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 interface ICategory {
   _id: string;
@@ -27,8 +28,8 @@ export default function CategoriesPage() {
   // Fetch Categories
   const fetchCategories = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/categories');
-      const data = await res.json();
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/categories`);
+      const data = res.data;
       if (data.success) {
         setCategories(data.data);
       }
@@ -68,20 +69,21 @@ export default function CategoriesPage() {
 
     try {
       const url = editingId 
-        ? `http://localhost:5000/api/v1/categories/${editingId}` 
-        : 'http://localhost:5000/api/v1/categories';
-      const method = editingId ? 'PUT' : 'POST';
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/categories/${editingId}` 
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/categories`;
+      const method = editingId ? 'put' : 'post';
 
-      const res = await fetch(url, {
+      const res = await axios({
         method,
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(categoryData)
+        data: categoryData
       });
       
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success(editingId ? 'Category updated successfully' : 'Category created successfully');
         setIsAddCategoryOpen(false);
@@ -107,11 +109,10 @@ export default function CategoriesPage() {
     setDeleting(true);
     const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/categories/${deleteModal.categoryId}`, {
-        method: 'DELETE',
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/categories/${deleteModal.categoryId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success('Category deleted successfully');
         fetchCategories();

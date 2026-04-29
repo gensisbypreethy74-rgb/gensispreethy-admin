@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 // Product type matching backend
 interface IVariant {
@@ -49,8 +50,8 @@ export default function ProductsPage() {
   // Fetch Products
   const fetchProducts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/products');
-      const data = await res.json();
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/products`);
+      const data = res.data;
       if (data.success) {
         setProducts(data.data);
       }
@@ -63,8 +64,8 @@ export default function ProductsPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/categories');
-      const data = await res.json();
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/categories`);
+      const data = res.data;
       if (data.success) {
         setDbCategories(data.data);
         const activeCategories = data.data.filter((c: any) => c.status === 'ACTIVE');
@@ -151,20 +152,21 @@ export default function ProductsPage() {
 
     try {
       const url = editingId 
-        ? `http://localhost:5000/api/v1/products/${editingId}` 
-        : 'http://localhost:5000/api/v1/products';
-      const method = editingId ? 'PUT' : 'POST';
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/products/${editingId}` 
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/products`;
+      const method = editingId ? 'put' : 'post';
 
-      const res = await fetch(url, {
+      const res = await axios({
         method,
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(productData)
+        data: productData
       });
       
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success(editingId ? 'Product updated successfully' : 'Product created successfully');
         setIsAddProductOpen(false);
@@ -190,11 +192,10 @@ export default function ProductsPage() {
     setDeleting(true);
     const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/products/${deleteModal.productId}`, {
-        method: 'DELETE',
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/products/${deleteModal.productId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success('Product deleted successfully');
         fetchProducts();
@@ -336,24 +337,38 @@ export default function ProductsPage() {
 
               {/* Product Variants */}
               <div>
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-4">
                   <label className="block text-[14px] font-bold text-slate-900">Product Variants</label>
                   <button onClick={handleAddVariant} className="bg-[#3b60f6] hover:bg-blue-700 text-white px-3 py-1.5 rounded-[8px] text-[13px] font-semibold flex items-center gap-1.5 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Add
+                    Add Variant
                   </button>
                 </div>
-                {variants.map((v, i) => (
-                  <div key={i} className="flex gap-2 mb-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-100">
-                    <input type="text" placeholder="Vol" value={v.volume} onChange={(e) => handleVariantChange(i, 'volume', e.target.value)} className="w-1/4 h-[40px] px-2 rounded-lg border text-sm" />
-                    <input type="number" placeholder="₹ Price" value={v.price} onChange={(e) => handleVariantChange(i, 'price', Number(e.target.value))} className="w-1/4 h-[40px] px-2 rounded-lg border text-sm" />
-                    <input type="number" placeholder="₹ Old" value={v.oldPrice} onChange={(e) => handleVariantChange(i, 'oldPrice', Number(e.target.value))} className="w-1/4 h-[40px] px-2 rounded-lg border text-sm" />
-                    <input type="number" placeholder="Stock" value={v.stock} onChange={(e) => handleVariantChange(i, 'stock', Number(e.target.value))} className="w-1/4 h-[40px] px-2 rounded-lg border text-sm" />
-                    {variants.length > 1 && (
-                      <button onClick={() => handleRemoveVariant(i)} className="text-red-500 font-bold px-2">X</button>
-                    )}
-                  </div>
-                ))}
+                
+                {/* Variant Headers */}
+                <div className="flex gap-2 mb-2 px-3">
+                  <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Size / Vol</div>
+                  <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Offer Price</div>
+                  <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Actual Price</div>
+                  <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Stock</div>
+                  {variants.length > 1 && <div className="w-8 shrink-0"></div>}
+                </div>
+
+                <div className="space-y-2">
+                  {variants.map((v, i) => (
+                    <div key={i} className="flex gap-2 items-center bg-slate-50 p-2 rounded-[12px] border border-slate-100">
+                      <input type="text" placeholder="e.g. 50ml" value={v.volume} onChange={(e) => handleVariantChange(i, 'volume', e.target.value)} className="flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] transition-all bg-white" />
+                      <input type="number" placeholder="₹ Offer" value={v.price === 0 ? '' : v.price} onChange={(e) => handleVariantChange(i, 'price', Number(e.target.value))} className="flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] transition-all bg-white" />
+                      <input type="number" placeholder="₹ Actual" value={v.oldPrice === 0 ? '' : v.oldPrice} onChange={(e) => handleVariantChange(i, 'oldPrice', Number(e.target.value))} className="flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] transition-all bg-white" />
+                      <input type="number" placeholder="Stock" value={v.stock} onChange={(e) => handleVariantChange(i, 'stock', Number(e.target.value))} className="flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] transition-all bg-white" />
+                      {variants.length > 1 && (
+                        <button onClick={() => handleRemoveVariant(i)} className="w-8 h-[42px] shrink-0 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-[8px] transition-colors">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Description */}

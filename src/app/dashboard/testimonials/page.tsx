@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 interface ITestimonial {
   _id: string;
@@ -32,8 +33,8 @@ export default function TestimonialsPage() {
 
   const fetchTestimonials = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/v1/testimonials');
-      const data = await res.json();
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/testimonials`);
+      const data = res.data;
       if (data.success) {
         setTestimonials(data.data);
       }
@@ -86,20 +87,21 @@ export default function TestimonialsPage() {
 
     try {
       const url = editingId 
-        ? `http://localhost:5000/api/v1/testimonials/${editingId}` 
-        : 'http://localhost:5000/api/v1/testimonials';
-      const method = editingId ? 'PUT' : 'POST';
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/testimonials/${editingId}` 
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/testimonials`;
+      const method = editingId ? 'put' : 'post';
 
-      const res = await fetch(url, {
+      const res = await axios({
         method,
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(testimonialData)
+        data: testimonialData
       });
       
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success(editingId ? 'Review updated successfully' : 'Review created successfully');
         handleClosePanel();
@@ -124,11 +126,10 @@ export default function TestimonialsPage() {
     setDeleting(true);
     const token = localStorage.getItem('adminToken');
     try {
-      const res = await fetch(`http://localhost:5000/api/v1/testimonials/${deleteModal.reviewId}`, {
-        method: 'DELETE',
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/testimonials/${deleteModal.reviewId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await res.json();
+      const data = res.data;
       if (data.success) {
         toast.success('Review deleted successfully');
         fetchTestimonials();

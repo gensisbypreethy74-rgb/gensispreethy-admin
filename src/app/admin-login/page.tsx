@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,15 +26,8 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/v1/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/auth/login`, { email, password });
+      const data = res.data;
 
       if (data.success) {
         // Store token in localStorage
