@@ -10,7 +10,7 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate login
     setTimeout(() => {
       setIsLoading(false);
