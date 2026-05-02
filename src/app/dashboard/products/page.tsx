@@ -257,19 +257,20 @@ export default function ProductsPage() {
             <table className="w-full text-left border-collapse min-w-[700px]">
               <thead>
                 <tr className="bg-[#f8fafc]">
-                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 rounded-l-[12px] w-[10%]">Image</th>
-                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[35%]">Name</th>
-                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[15%]">Category</th>
-                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[15%]">Starting Price</th>
+                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 rounded-l-[12px] w-[8%]">Image</th>
+                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[30%]">Name</th>
+                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[12%]">Category</th>
+                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[14%]">Starting Price</th>
+                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[12%]">Stock</th>
                   <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[10%]">Status</th>
-                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 rounded-r-[12px] w-[15%]">Actions</th>
+                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 rounded-r-[12px] w-[14%]">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={6} className="py-8 text-center text-slate-500">Loading products...</td></tr>
+                  <tr><td colSpan={7} className="py-8 text-center text-slate-500">Loading products...</td></tr>
                 ) : products.length === 0 ? (
-                  <tr><td colSpan={6} className="py-8 text-center text-slate-500">No products found. Add your first product!</td></tr>
+                  <tr><td colSpan={7} className="py-8 text-center text-slate-500">No products found. Add your first product!</td></tr>
                 ) : products.map((product) => {
                   const getImageUrl = (url: string) => {
                     if (!url) return 'https://via.placeholder.com/50';
@@ -299,6 +300,21 @@ export default function ProductsPage() {
                       ) : (
                         <span className="text-slate-400">-</span>
                       )}
+                    </td>
+                    <td className="py-5 px-6">
+                      {(() => {
+                        const totalStock = product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+                        const badgeColor = totalStock === 0
+                          ? 'bg-red-50 text-red-600'
+                          : totalStock <= 5
+                          ? 'bg-orange-50 text-orange-600'
+                          : 'bg-emerald-50 text-emerald-700';
+                        return (
+                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[13px] font-bold ${badgeColor}`}>
+                            {totalStock === 0 ? 'Out of Stock' : `${totalStock} units`}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="py-5 px-6">
                       <span className="text-[15px] font-medium text-slate-600 w-12 block leading-tight">
