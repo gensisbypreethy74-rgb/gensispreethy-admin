@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// This function can be marked `async` if using `await` inside
+/**
+ * Middleware for authentication protection
+ * This middleware checks for admin token and redirects unauthenticated users
+ * Note: This is not API proxying - it's authentication middleware which is the recommended use of Next.js middleware
+ */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   

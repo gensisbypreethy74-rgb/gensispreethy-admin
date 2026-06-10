@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    optimizePackageImports: ["react-hot-toast"],
+  },
 };
 
 export default nextConfig;
