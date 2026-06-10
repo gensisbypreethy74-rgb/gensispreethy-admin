@@ -37,6 +37,7 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteModal, setDeleteModal] = useState<{isOpen: boolean, productId: string | null}>({ isOpen: false, productId: null });
   const [deleting, setDeleting] = useState(false);
+  const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({});
   
   // Form State
   const [name, setName] = useState('');
@@ -340,10 +341,20 @@ export default function ProductsPage() {
                     return url;
                   };
 
+                  const handleImageError = (productId: string) => {
+                    setImageErrors(prev => ({...prev, [productId]: true}));
+                  };
+
                   return (
                   <tr key={product._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors">
                     <td className="py-5 px-6">
-                      <img src={getImageUrl(product.images[0])} alt={product.name} className="w-[50px] h-[50px] rounded-[10px] object-cover bg-slate-100" />
+                      <img 
+                        src={getImageUrl(product.images[0])} 
+                        alt={product.name} 
+                        className="w-[50px] h-[50px] rounded-[10px] object-cover bg-slate-100"
+                        onError={() => handleImageError(product._id)}
+                        loading="lazy"
+                      />
                     </td>
                     <td className="py-5 px-6 text-[15px] font-bold text-[#111827] leading-snug pr-8">{product.name}</td>
                     <td className="py-5 px-6 text-[15px] font-medium text-slate-600">{product.category}</td>

@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Luxy Galleria Admin",
   description: "Admin panel for Luxy Galleria - Premium imported drinks, snacks & more.",
+  icons: {
+    icon: "/luxy_logo.png",
+  },
 };
 
 export default function RootLayout({
