@@ -15,12 +15,11 @@ const apiClient = axios.create({
 // Request interceptor for API calls
 apiClient.interceptors.request.use(
   (config) => {
-    // You can attach the token from cookies/localStorage here before each request
-    // Example:
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers['Authorization'] = `Bearer ${token}`;
-    // }
+    // Attach the token from localStorage before each request
+    const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -34,10 +33,14 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error) => {
-    // Handle global errors, e.g., redirect to login on 401 Unauthorized
-    // if (error.response?.status === 401) {
-    //   window.location.href = '/login';
-    // }
+    // Handle 401 Unauthorized - redirect to login
+    if (error.response?.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        window.location.href = '/login';
+      }
+    }
     return Promise.reject(error);
   }
 );

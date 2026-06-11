@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { getImageUrl, handleImageError } from '../../../lib/imageUtils';
 
 interface OrderItem {
   product: {
@@ -50,6 +51,8 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{isOpen: boolean, orderId: string | null}>({ isOpen: false, orderId: null });
+  const [deleting, setDeleting] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -133,6 +136,37 @@ export default function OrdersPage() {
       }
     } finally {
       setUpdatingOrderId(null);
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteModal({ isOpen: true, orderId: id });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal.orderId) return;
+
+    try {
+      setDeleting(true);
+      const res = await axios.delete(`${API_URL}/v1/payments/admin/orders/${deleteModal.orderId}`, getAuthHeaders());
+      
+      if (res.data.success) {
+        setOrders(prevOrders => prevOrders.filter(order => order._id !== deleteModal.orderId));
+        setDeleteModal({ isOpen: false, orderId: null });
+        if (selectedOrder === deleteModal.orderId) {
+          setSelectedOrder(null);
+        }
+        toast.success('Order deleted successfully');
+      }
+    } catch (err: any) {
+      console.error('Failed to delete order', err);
+      if (err.response?.status === 401) {
+        handleAuthError();
+      } else {
+        toast.error(err.response?.data?.message || 'Failed to delete order');
+      }
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -220,12 +254,21 @@ export default function OrdersPage() {
                       </td>
                       <td className="py-5 px-6 text-[15px] text-[#111827] font-medium">{formatDate(order.createdAt)}</td>
                       <td className="py-5 px-6">
-                        <button
-                          onClick={() => setSelectedOrder(order._id)}
-                          className="text-[#3b82f6] hover:text-blue-700 transition-colors flex items-center justify-center p-2 rounded-full hover:bg-blue-50"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setSelectedOrder(order._id)}
+                            className="text-[#3b82f6] hover:text-blue-700 transition-colors flex items-center justify-center p-2 rounded-full hover:bg-blue-50"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(order._id)}
+                            className="w-[36px] h-[36px] rounded-[10px] bg-[#fef2f2] text-[#ef4444] hover:bg-red-100 flex items-center justify-center transition-colors"
+                            title="Delete Order"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -304,7 +347,12 @@ export default function OrdersPage() {
                     <div key={idx} className="flex gap-3 pb-4 border-b border-slate-100 last:border-0 last:pb-0">
                       <div className="w-12 h-12 rounded-lg bg-slate-100 shrink-0 overflow-hidden">
                         {item.product?.images?.[0] ? (
-                          <img src={item.product.images[0]} alt={item.product?.name} className="w-full h-full object-cover" />
+                          <img 
+                            src={getImageUrl(item.product.images[0])} 
+                            alt={item.product?.name} 
+                            className="w-full h-full object-cover" 
+                            onError={handleImageError}
+                          />
                         ) : (
                           <div className="w-full h-full bg-slate-200" />
                         )}
@@ -342,6 +390,45 @@ export default function OrdersPage() {
         )}
 
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-[20px] shadow-xl max-w-sm w-full p-8">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </div>
+            <h3 className="text-[20px] font-bold text-[#111827] text-center mb-2">Delete Order?</h3>
+            <p className="text-[15px] text-slate-600 text-center mb-6">Are you sure you want to delete this order? This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteModal({ isOpen: false, orderId: null })}
+                disabled={deleting}
+                className="flex-1 px-4 py-3 rounded-[12px] border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="flex-1 px-4 py-3 rounded-[12px] bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deleting ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

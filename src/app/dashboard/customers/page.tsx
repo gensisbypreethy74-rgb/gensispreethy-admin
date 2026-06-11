@@ -58,6 +58,23 @@ export default function CustomersPage() {
     }
   };
 
+  const deleteCustomer = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete ${name}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await axios.delete(`${API_URL}/v1/users/admin/customers/${id}`, getAuthHeaders());
+      if (res.data.success) {
+        setCustomers(customers.filter(customer => customer._id !== id));
+        alert('Customer deleted successfully');
+      }
+    } catch (err: any) {
+      console.error('Failed to delete customer', err);
+      alert(err.response?.data?.message || 'Failed to delete customer');
+    }
+  };
+
   const getStatusStyle = (isActive: boolean) => {
     return isActive 
       ? 'bg-[#dcfce7] text-[#16a34a]' 
@@ -96,7 +113,7 @@ export default function CustomersPage() {
                   <th className="py-4 px-6 text-[13px] font-semibold text-slate-500 w-[15%]">Phone</th>
                   <th className="py-4 px-6 text-[13px] font-semibold text-slate-500 w-[10%]">Joined</th>
                   <th className="py-4 px-6 text-[13px] font-semibold text-slate-500 w-[10%]">Status</th>
-                  <th className="py-4 px-6 text-[13px] font-semibold text-slate-500 rounded-r-[12px] w-[10%]">Actions</th>
+                  <th className="py-4 px-6 text-[13px] font-semibold text-slate-500 rounded-r-[12px] w-[15%]">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -112,21 +129,30 @@ export default function CustomersPage() {
                       </span>
                     </td>
                     <td className="py-5 px-6">
-                      <button 
-                        onClick={() => toggleCustomerStatus(customer._id)}
-                        className={`w-[34px] h-[34px] rounded-[8px] flex items-center justify-center transition-colors ${
-                          customer.isActive 
-                            ? 'bg-[#fef2f2] text-[#ef4444] hover:bg-red-100' 
-                            : 'bg-[#dcfce7] text-[#16a34a] hover:bg-green-100'
-                        }`}
-                        title={customer.isActive ? 'Block Customer' : 'Unblock Customer'}
-                      >
-                        {customer.isActive ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => toggleCustomerStatus(customer._id)}
+                          className={`w-[34px] h-[34px] rounded-[8px] flex items-center justify-center transition-colors ${
+                            customer.isActive 
+                              ? 'bg-[#fef2f2] text-[#ef4444] hover:bg-red-100' 
+                              : 'bg-[#dcfce7] text-[#16a34a] hover:bg-green-100'
+                          }`}
+                          title={customer.isActive ? 'Block Customer' : 'Unblock Customer'}
+                        >
+                          {customer.isActive ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          )}
+                        </button>
+                        <button 
+                          onClick={() => deleteCustomer(customer._id, customer.name)}
+                          className="w-[34px] h-[34px] rounded-[8px] flex items-center justify-center bg-[#fef2f2] text-[#ef4444] hover:bg-red-100 transition-colors"
+                          title="Delete Customer"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { getImageUrl, handleImageError } from '../../../lib/imageUtils';
 
 // Product type matching backend
 interface IVariant {
@@ -125,7 +126,7 @@ export default function ProductsPage() {
     setWeight(product.weight || 0);
     
     const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.replace('/api', '') || 'http://localhost:5000';
-    const fullImageUrls = product.images.map(url => url.startsWith('/uploads/') ? `${baseUrl}${url}` : url);
+    const fullImageUrls = product.images.map(getImageUrl);
     setImageUrls(fullImageUrls.join(', '));
     
     setImageFiles([]);
@@ -331,20 +332,6 @@ export default function ProductsPage() {
                 ) : products.length === 0 ? (
                   <tr><td colSpan={7} className="py-8 text-center text-slate-500">No products found. Add your first product!</td></tr>
                 ) : products.map((product) => {
-                  const getImageUrl = (url: string) => {
-                    if (!url) return 'https://via.placeholder.com/50';
-                    if (url.startsWith('/uploads/')) {
-                      // Backend URL is usually something like http://localhost:5000/api, so we remove /api
-                      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.replace('/api', '') || 'http://localhost:5000';
-                      return `${baseUrl}${url}`;
-                    }
-                    return url;
-                  };
-
-                  const handleImageError = (productId: string) => {
-                    setImageErrors(prev => ({...prev, [productId]: true}));
-                  };
-
                   return (
                   <tr key={product._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors">
                     <td className="py-5 px-6">
@@ -352,7 +339,7 @@ export default function ProductsPage() {
                         src={getImageUrl(product.images[0])} 
                         alt={product.name} 
                         className="w-[50px] h-[50px] rounded-[10px] object-cover bg-slate-100"
-                        onError={() => handleImageError(product._id)}
+                        onError={handleImageError}
                         loading="lazy"
                       />
                     </td>

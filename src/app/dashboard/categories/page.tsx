@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { getImageUrl, handleImageError } from '../../../lib/imageUtils';
 
 interface ICategory {
   _id: string;
@@ -60,9 +61,7 @@ export default function CategoriesPage() {
     setEditingId(category._id);
     setName(category.name);
     
-    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.replace('/api', '') || 'http://localhost:5000';
-    const fullImageUrl = category.image?.startsWith('/uploads/') ? `${baseUrl}${category.image}` : category.image;
-    setImage(fullImageUrl || '');
+    setImage(getImageUrl(category.image) || '');
     
     setImageFile(null);
     setPreviewUrl('');
@@ -182,7 +181,12 @@ export default function CategoriesPage() {
                 ) : categories.map((category) => (
                   <tr key={category._id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors">
                     <td className="py-5 px-6">
-                      <img src={(category.image?.startsWith('/uploads/') ? (`${process.env.NEXT_PUBLIC_BACKEND_URL?.replace('/api', '') || 'http://localhost:5000'}${category.image}`) : category.image) || 'https://via.placeholder.com/54'} alt={category.name} className="w-[54px] h-[54px] rounded-[12px] object-cover bg-slate-100 shadow-sm" />
+                      <img 
+                        src={getImageUrl(category.image)} 
+                        alt={category.name} 
+                        className="w-[54px] h-[54px] rounded-[12px] object-cover bg-slate-100 shadow-sm" 
+                        onError={handleImageError}
+                      />
                     </td>
                     <td className="py-5 px-6 text-[15px] font-bold text-[#111827]">{category.name}</td>
                     <td className="py-5 px-6">
