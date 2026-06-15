@@ -82,8 +82,8 @@ export default function FaqsPage() {
 
     try {
       const url = editingId
-        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/faqs/admin/${editingId}`
-        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/faqs/admin`;
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/faqs/admin/${editingId}`
+        : `${process.env.NEXT_PUBLIC_BACKEND_URL}/faqs/admin`;
       const method = editingId ? 'put' : 'post';
 
       const res = await axios({
