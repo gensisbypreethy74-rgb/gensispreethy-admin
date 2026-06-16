@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../services/apiClient';
 
 interface RecentOrder {
   _id: string;
@@ -25,16 +25,10 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem('adminToken');
-        const res = await axios.get(`${API_URL}/dashboard/stats`, {
-          withCredentials: true,
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
+        const res = await apiClient.get('/dashboard/stats');
         if (res.data.success) {
           setStats(res.data.data);
         }
