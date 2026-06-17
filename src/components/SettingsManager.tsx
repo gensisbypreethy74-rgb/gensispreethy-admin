@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import axios from '../services/apiClient';
+import apiClient from '../services/apiClient';
 
 interface Settings {
   _id?: string;
@@ -31,7 +31,7 @@ export default function SettingsManager() {
 
   const fetchSettings = async () => {
     try {
-      const response = await axios.get('/settings');
+      const response = await apiClient.get('/settings');
       setSettings(response.data.data || settings);
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -43,7 +43,7 @@ export default function SettingsManager() {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await axios.put('/settings', settings);
+      await apiClient.put('/settings', settings);
       alert('Settings updated successfully!');
     } catch (error: any) {
       console.error('Error saving settings:', error);
@@ -107,7 +107,6 @@ export default function SettingsManager() {
             placeholder="e.g., 918907076996"
           />
         </div>
-
 
         <button
           onClick={handleSave}
