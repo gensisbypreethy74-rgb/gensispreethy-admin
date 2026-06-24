@@ -10,6 +10,7 @@ interface IVariant {
   volume: string;
   price: number;
   oldPrice?: number;
+  weight?: number;
 }
 
 interface IProduct {
@@ -54,7 +55,7 @@ export default function ProductsPage() {
   const [imageUrls, setImageUrls] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [variants, setVariants] = useState<IVariant[]>([{ volume: '50ml', price: 0, oldPrice: 0 }]);
+  const [variants, setVariants] = useState<IVariant[]>([{ volume: '50ml', price: 0, oldPrice: 0, weight: 0 }]);
 
   // Fetch Products
   const fetchProducts = async () => {
@@ -108,7 +109,7 @@ export default function ProductsPage() {
     setImageUrls('');
     setImageFiles([]);
     setPreviewUrls([]);
-    setVariants([{ volume: '50ml', price: 0, oldPrice: 0 }]);
+    setVariants([{ volume: '50ml', price: 0, oldPrice: 0, weight: 0 }]);
     setIsAddProductOpen(true);
   };
 
@@ -132,13 +133,13 @@ export default function ProductsPage() {
     setImageFiles([]);
     setPreviewUrls([]);
     // Provide a deep copy of variants to prevent mutating original state directly
-    setVariants(product.variants.map(v => ({ volume: v.volume, price: v.price, oldPrice: v.oldPrice })));
+    setVariants(product.variants.map(v => ({ volume: v.volume, price: v.price, oldPrice: v.oldPrice, weight: v.weight || 0 })));
     setIsAddProductOpen(true);
   };
 
   // Handle Add Variant
   const handleAddVariant = () => {
-    setVariants([...variants, { volume: '100ml', price: 0, oldPrice: 0 }]);
+    setVariants([...variants, { volume: '100ml', price: 0, oldPrice: 0, weight: 0 }]);
   };
 
   const handleVariantChange = (index: number, field: keyof IVariant, value: string | number) => {
@@ -215,7 +216,7 @@ export default function ProductsPage() {
     formData.append('keyFeatures', keyFeatures);
     formData.append('showOnLandingPage', String(showOnLandingPage));
     formData.append('stock', String(stock));
-    formData.append('weight', String(weight));
+    // We removed the global weight. Weight is now parsed through variants json.
 
     // Convert comma separated images to array
     const imagesArray = imageUrls.split(',').map(url => url.trim()).filter(url => url);
@@ -444,6 +445,7 @@ export default function ProductsPage() {
                 {/* Variant Headers */}
                 <div className="flex gap-2 mb-2 px-3">
                   <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Size / Vol</div>
+                  <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Weight (g/ml)</div>
                   <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Offer Price</div>
                   <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Actual Price</div>
 
@@ -457,6 +459,7 @@ export default function ProductsPage() {
                       <div key={i} className="flex flex-col gap-1">
                         <div className={`flex gap-2 items-center bg-slate-50 p-2 rounded-[12px] border ${priceError ? 'border-red-200' : 'border-slate-100'}`}>
                           <input type="text" placeholder="e.g. 50ml" value={v.volume} onChange={(e) => handleVariantChange(i, 'volume', e.target.value)} className="flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] transition-all bg-white" />
+                          <input type="number" placeholder="Weight (g)" value={v.weight === 0 ? '' : v.weight} onChange={(e) => handleVariantChange(i, 'weight', Number(e.target.value))} className="flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] transition-all bg-white" />
                           <input type="number" placeholder="₹ Offer" value={v.price === 0 ? '' : v.price} onChange={(e) => handleVariantChange(i, 'price', Number(e.target.value))} className={`flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border outline-none text-[14px] transition-all bg-white ${priceError ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-red-600 bg-red-50/30' : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`} />
                           <input type="number" placeholder="₹ Actual" value={v.oldPrice === 0 ? '' : v.oldPrice} onChange={(e) => handleVariantChange(i, 'oldPrice', Number(e.target.value))} className={`flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border outline-none text-[14px] transition-all bg-white ${priceError ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-red-600 bg-red-50/30' : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`} />
 
@@ -495,15 +498,11 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              {/* Stock & Weight */}
+              {/* Stock */}
               <div className="flex gap-4">
                 <div className="flex-1">
                   <label className="block text-[14px] font-bold text-slate-900 mb-2.5">Stock</label>
                   <input type="number" min="0" value={stock} onChange={e => setStock(Number(e.target.value))} className="w-full h-[50px] px-4 rounded-[12px] border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-[15px]" />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-[14px] font-bold text-slate-900 mb-2.5">Weight (in Kg)</label>
-                  <input type="number" min="0" step="0.1" value={weight} onChange={e => setWeight(Number(e.target.value))} className="w-full h-[50px] px-4 rounded-[12px] border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-[15px]" />
                 </div>
               </div>
 
