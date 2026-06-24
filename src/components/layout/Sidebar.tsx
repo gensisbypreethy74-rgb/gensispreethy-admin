@@ -116,7 +116,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <img 
               src="/luxy_logo.png" 
               alt="Luxy Galleria" 
-              className="object-contain w-full h-full brightness-0 invert" 
+              className="object-contain w-full h-full" 
             />
           </Link>
         </div>
@@ -142,7 +142,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <img 
                 src="/luxy_logo.png" 
                 alt="Luxy Galleria" 
-                className="object-contain w-full h-full brightness-0 invert" 
+                className="object-contain w-full h-full" 
               />
             </Link>
           </div>

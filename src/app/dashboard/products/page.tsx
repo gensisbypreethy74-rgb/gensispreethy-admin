@@ -320,7 +320,7 @@ export default function ProductsPage() {
                   <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 rounded-l-[12px] w-[8%]">Image</th>
                   <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[30%]">Name</th>
                   <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[12%]">Category</th>
-                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[14%]">Starting Price</th>
+                  <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[14%]">Variant (Price)</th>
                   <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[10%]">Stock / Wt</th>
                   <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 w-[10%]">Status</th>
                   <th className="py-4 px-6 text-[14px] font-semibold text-slate-500 rounded-r-[12px] w-[14%]">Actions</th>
@@ -348,6 +348,7 @@ export default function ProductsPage() {
                     <td className="py-5 px-6">
                       {product.variants.length > 0 ? (
                         <div className="flex flex-col">
+                          <span className="text-[13px] font-semibold text-slate-500 mb-0.5">{product.variants[0].volume}</span>
                           <span className="text-[15px] font-bold text-[#3b60f6]">₹{product.variants[0].price}</span>
                           {product.variants[0].oldPrice && (
                             <span className="text-[13px] font-medium text-slate-400 line-through">₹{product.variants[0].oldPrice}</span>
