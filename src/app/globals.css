@@ -75,3 +75,22 @@ input:focus, select:focus, textarea:focus {
   color: #F5E6C4 !important;
 }
 
+/* Custom override for primary action and update buttons to be black background with gold text */
+button.bg-\[\#2563eb\],
+button.bg-\[\#3b60f6\],
+button.bg-\[\#10b981\] {
+  background-color: #000000 !important;
+  color: #C5A866 !important;
+  border: 1px solid #C5A866 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+button.bg-\[\#2563eb\]:hover,
+button.bg-\[\#3b60f6\]:hover,
+button.bg-\[\#10b981\]:hover {
+  background-color: #C5A866 !important;
+  color: #000000 !important;
+  border-color: #C5A866 !important;
+}
+
+
