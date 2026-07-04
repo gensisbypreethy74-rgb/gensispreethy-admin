@@ -35,9 +35,16 @@
 
 /* Force light background elements to dark charcoal card style */
 .bg-white,
+[class*="bg-white"],
 .bg-slate-50,
 .bg-slate-100,
-.bg-slate-200 {
+.bg-slate-200,
+.bg-gray-50,
+.bg-gray-100,
+.bg-gray-200,
+[class*="bg-gray-50"],
+[class*="bg-gray-100"],
+[class*="bg-slate-50"] {
   background-color: #121212 !important;
   border-color: #222222 !important;
 }
@@ -78,7 +85,12 @@ input:focus, select:focus, textarea:focus {
 /* Custom override for primary action and update buttons to be black background with gold text */
 button.bg-\[\#2563eb\],
 button.bg-\[\#3b60f6\],
-button.bg-\[\#10b981\] {
+button.bg-\[\#10b981\],
+button.bg-\[\#8B5E34\],
+a.bg-\[\#2563eb\],
+a.bg-\[\#3b60f6\],
+a.bg-\[\#10b981\],
+a.bg-\[\#8B5E34\] {
   background-color: #000000 !important;
   color: #C5A866 !important;
   border: 1px solid #C5A866 !important;
@@ -87,10 +99,40 @@ button.bg-\[\#10b981\] {
 
 button.bg-\[\#2563eb\]:hover,
 button.bg-\[\#3b60f6\]:hover,
-button.bg-\[\#10b981\]:hover {
+button.bg-\[\#10b981\]:hover,
+button.bg-\[\#8B5E34\]:hover,
+a.bg-\[\#2563eb\]:hover,
+a.bg-\[\#3b60f6\]:hover,
+a.bg-\[\#10b981\]:hover,
+a.bg-\[\#8B5E34\]:hover {
   background-color: #C5A866 !important;
   color: #000000 !important;
   border-color: #C5A866 !important;
 }
+
+/* Force dark labels and text colors to be readable inside forced dark-charcoal cards */
+.bg-white label,
+.bg-white p,
+.bg-white span,
+.bg-white h2,
+.bg-white h3,
+[class*="bg-white"] label,
+[class*="bg-white"] p,
+[class*="bg-white"] span,
+[class*="bg-white"] h2,
+[class*="bg-white"] h3,
+.bg-gray-50 label,
+.bg-gray-50 p,
+.bg-gray-50 span,
+.bg-gray-50 h2,
+.bg-gray-50 h3,
+[class*="bg-gray-50"] label,
+[class*="bg-gray-50"] p,
+[class*="bg-gray-50"] span,
+[class*="bg-gray-50"] h2,
+[class*="bg-gray-50"] h3 {
+  color: #F5E6C4 !important;
+}
+
 
 
