@@ -1,8 +1,8 @@
 import SettingsManager from '@/components/SettingsManager';
 
 export const metadata = {
-  title: 'Settings - Luxy Admin',
-  description: 'Manage global settings for Luxy Galleria',
+  title: 'Settings - Genesis Admin',
+  description: 'Manage global settings for Genesis by Preethy',
 };
 
 export default function SettingsPage() {

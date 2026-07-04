@@ -6,10 +6,10 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Luxy Galleria Admin",
-  description: "Admin panel for Luxy Galleria - Premium imported drinks, snacks & more.",
+  title: "Genesis Admin",
+  description: "Admin panel for Genesis by Preethy - Premium luxury fashion boutique",
   icons: {
-    icon: "/luxy_logo.png",
+    icon: "/genesis_icon.png",
   },
 };
 

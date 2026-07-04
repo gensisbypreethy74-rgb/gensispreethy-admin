@@ -3,18 +3,75 @@
 @theme inline {
   --font-sans: var(--font-inter);
 
-  /* Override default blue with Luxy colors */
-  --color-blue-50: #FAF8F5;
-  --color-blue-100: #F5F1E8;
-  --color-blue-400: #C9A961;
-  --color-blue-500: #A68B5B; /* Primary */
-  --color-blue-600: #8B5E34; /* Hover state */
-  --color-blue-700: #6B5344; /* Active/Dark state */
-  --color-blue-800: #4A3A2C;
+  /* Map slate (grays) to dark theme */
+  --color-slate-50: #0D0D0D;
+  --color-slate-100: #141414;
+  --color-slate-200: #222222;
+  --color-slate-300: #333333;
+  --color-slate-400: #888888;
+  --color-slate-500: #A3A3A3;
+  --color-slate-600: #D4D4D4;
+  --color-slate-700: #E5E5E5;
+  --color-slate-800: #F5E6C4;
+  --color-slate-900: #FFFFFF;
+  --color-slate-950: #050505;
+
+  /* Map blue accents to brand gold colors */
+  --color-blue-50: #161512;
+  --color-blue-100: #222019;
+  --color-blue-200: #3C3729;
+  --color-blue-300: #6B6043;
+  --color-blue-400: #A89563;
+  --color-blue-500: #C5A866; /* Gold Primary */
+  --color-blue-600: #D8BD80; /* Gold Hover */
+  --color-blue-700: #A88F52; /* Active/Dark gold */
 }
 
 @layer base {
   html, body {
-    @apply h-full antialiased;
+    @apply h-full antialiased bg-[#0A0A0A] text-[#F5E6C4];
   }
 }
+
+/* Force light background elements to dark charcoal card style */
+.bg-white,
+.bg-slate-50,
+.bg-slate-100,
+.bg-slate-200 {
+  background-color: #121212 !important;
+  border-color: #222222 !important;
+}
+
+/* Force text colors to champagne or white on dark mode */
+.text-slate-900,
+.text-slate-800,
+.text-slate-700 {
+  color: #F5E6C4 !important;
+}
+
+.text-slate-600 {
+  color: #E5D5B3 !important;
+}
+
+.text-slate-500,
+.text-slate-400 {
+  color: #A89563 !important;
+}
+
+/* Form controls styling */
+input, select, textarea {
+  background-color: #1A1A1A !important;
+  color: #FFFFFF !important;
+  border-color: #333333 !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #C5A866 !important;
+}
+
+/* Force text colors for hardcoded slate/blue elements in layout */
+.text-\[\#111827\],
+[class*="text-[#111827]"] {
+  color: #F5E6C4 !important;
+}
+

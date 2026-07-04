@@ -55,7 +55,13 @@ export default function ProductsPage() {
   const [imageUrls, setImageUrls] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [variants, setVariants] = useState<IVariant[]>([{ volume: '50ml', price: 0, oldPrice: 0, weight: 0 }]);
+  const [variants, setVariants] = useState<IVariant[]>([
+    { volume: 'S', price: 0, oldPrice: 0, weight: 0 },
+    { volume: 'M', price: 0, oldPrice: 0, weight: 0 },
+    { volume: 'L', price: 0, oldPrice: 0, weight: 0 },
+    { volume: 'XL', price: 0, oldPrice: 0, weight: 0 },
+    { volume: 'XXL', price: 0, oldPrice: 0, weight: 0 }
+  ]);
 
   // Fetch Products
   const fetchProducts = async () => {
@@ -109,7 +115,13 @@ export default function ProductsPage() {
     setImageUrls('');
     setImageFiles([]);
     setPreviewUrls([]);
-    setVariants([{ volume: '50ml', price: 0, oldPrice: 0, weight: 0 }]);
+    setVariants([
+      { volume: 'S', price: 0, oldPrice: 0, weight: 0 },
+      { volume: 'M', price: 0, oldPrice: 0, weight: 0 },
+      { volume: 'L', price: 0, oldPrice: 0, weight: 0 },
+      { volume: 'XL', price: 0, oldPrice: 0, weight: 0 },
+      { volume: 'XXL', price: 0, oldPrice: 0, weight: 0 }
+    ]);
     setIsAddProductOpen(true);
   };
 
@@ -139,7 +151,7 @@ export default function ProductsPage() {
 
   // Handle Add Variant
   const handleAddVariant = () => {
-    setVariants([...variants, { volume: '100ml', price: 0, oldPrice: 0, weight: 0 }]);
+    setVariants([...variants, { volume: '', price: 0, oldPrice: 0, weight: 0 }]);
   };
 
   const handleVariantChange = (index: number, field: keyof IVariant, value: string | number) => {
@@ -192,7 +204,7 @@ export default function ProductsPage() {
 
     for (let i = 0; i < variants.length; i++) {
       const v = variants[i];
-      if (!v.volume.trim()) return toast.error(`Variant ${i + 1}: Size/Vol is required.`);
+      if (!v.volume.trim()) return toast.error(`Variant ${i + 1}: Size is required.`);
       if (v.price <= 0) return toast.error(`Variant ${i + 1}: Offer Price must be greater than zero.`);
       if (v.oldPrice && v.oldPrice > 0 && v.oldPrice < v.price) {
         return toast.error(`Variant ${i + 1}: Actual Price (₹${v.oldPrice}) cannot be less than Offer Price (₹${v.price}).`);
@@ -444,8 +456,7 @@ export default function ProductsPage() {
                 
                 {/* Variant Headers */}
                 <div className="flex gap-2 mb-2 px-3">
-                  <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Size / Vol</div>
-                  <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Weight (g/ml)</div>
+                  <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Size</div>
                   <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Offer Price</div>
                   <div className="flex-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Actual Price</div>
 
@@ -458,8 +469,7 @@ export default function ProductsPage() {
                     return (
                       <div key={i} className="flex flex-col gap-1">
                         <div className={`flex gap-2 items-center bg-slate-50 p-2 rounded-[12px] border ${priceError ? 'border-red-200' : 'border-slate-100'}`}>
-                          <input type="text" placeholder="e.g. 50ml" value={v.volume} onChange={(e) => handleVariantChange(i, 'volume', e.target.value)} className="flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] transition-all bg-white" />
-                          <input type="number" placeholder="Weight (g)" value={v.weight === 0 ? '' : v.weight} onChange={(e) => handleVariantChange(i, 'weight', Number(e.target.value))} className="flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] transition-all bg-white" />
+                          <input type="text" placeholder="Size" value={v.volume} onChange={(e) => handleVariantChange(i, 'volume', e.target.value)} className="flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-[14px] transition-all bg-white" />
                           <input type="number" placeholder="₹ Offer" value={v.price === 0 ? '' : v.price} onChange={(e) => handleVariantChange(i, 'price', Number(e.target.value))} className={`flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border outline-none text-[14px] transition-all bg-white ${priceError ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-red-600 bg-red-50/30' : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`} />
                           <input type="number" placeholder="₹ Actual" value={v.oldPrice === 0 ? '' : v.oldPrice} onChange={(e) => handleVariantChange(i, 'oldPrice', Number(e.target.value))} className={`flex-1 min-w-0 h-[42px] px-3 rounded-[8px] border outline-none text-[14px] transition-all bg-white ${priceError ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-red-600 bg-red-50/30' : 'border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`} />
 
@@ -512,10 +522,7 @@ export default function ProductsPage() {
                 <input type="text" value={offerText} onChange={e => setOfferText(e.target.value)} placeholder="Leave empty for default" className="w-full h-[50px] px-4 rounded-[12px] border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 text-[15px]" />
               </div>
 
-              <div>
-                <label className="block text-[14px] font-bold text-slate-900 mb-2.5">Key Features (Benefits, one per line or comma separated)</label>
-                <textarea value={keyFeatures} onChange={e => setKeyFeatures(e.target.value)} placeholder="e.g. Brightens Skin&#10;Reduces dark spots" className="w-full h-[100px] p-4 rounded-[12px] border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none text-[15px]"></textarea>
-              </div>
+
 
               {/* Show on Landing Page */}
               {(() => {

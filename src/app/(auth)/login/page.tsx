@@ -62,7 +62,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900 tracking-tight">
-            Sign in to Luxy Admin
+            Sign in to Genesis Admin
           </h2>
           <p className="mt-2 text-center text-sm text-slate-600">
             Enter your credentials to access the dashboard
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="appearance-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-400 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8B5E34] focus:border-[#8B5E34] focus:z-10 sm:text-sm"
-                placeholder="admin@luxygalleria.com"
+                placeholder="admin@genesisbypreethy.com"
               />
             </div>
             <div>
