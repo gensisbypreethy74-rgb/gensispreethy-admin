@@ -30,6 +30,20 @@ interface IProduct {
   weight?: number;
 }
 
+const getDefaultVariantsForCategory = (catName: string): IVariant[] => {
+  const normalized = catName ? catName.toLowerCase() : '';
+  if (normalized.includes('saree') || normalized.includes('set')) {
+    return [{ volume: 'FREE SIZE', price: 0, oldPrice: 0, weight: 0 }];
+  }
+  return [
+    { volume: 'S', price: 0, oldPrice: 0, weight: 0 },
+    { volume: 'M', price: 0, oldPrice: 0, weight: 0 },
+    { volume: 'L', price: 0, oldPrice: 0, weight: 0 },
+    { volume: 'XL', price: 0, oldPrice: 0, weight: 0 },
+    { volume: 'XXL', price: 0, oldPrice: 0, weight: 0 }
+  ];
+};
+
 export default function ProductsPage() {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -103,7 +117,8 @@ export default function ProductsPage() {
     setEditingId(null);
     setName('');
     const activeCategories = dbCategories.filter(c => c.status === 'ACTIVE');
-    setCategory(activeCategories.length > 0 ? activeCategories[0].name : '');
+    const defaultCatName = activeCategories.length > 0 ? activeCategories[0].name : '';
+    setCategory(defaultCatName);
     setDescription('');
     setStarRating(5);
     setReviewsCount(0);
@@ -115,14 +130,15 @@ export default function ProductsPage() {
     setImageUrls('');
     setImageFiles([]);
     setPreviewUrls([]);
-    setVariants([
-      { volume: 'S', price: 0, oldPrice: 0, weight: 0 },
-      { volume: 'M', price: 0, oldPrice: 0, weight: 0 },
-      { volume: 'L', price: 0, oldPrice: 0, weight: 0 },
-      { volume: 'XL', price: 0, oldPrice: 0, weight: 0 },
-      { volume: 'XXL', price: 0, oldPrice: 0, weight: 0 }
-    ]);
+    setVariants(getDefaultVariantsForCategory(defaultCatName));
     setIsAddProductOpen(true);
+  };
+
+  const handleCategoryChange = (val: string) => {
+    setCategory(val);
+    if (!editingId) {
+      setVariants(getDefaultVariantsForCategory(val));
+    }
   };
 
   const handleEdit = (product: IProduct) => {
@@ -168,8 +184,9 @@ export default function ProductsPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      if (imageFiles.length + newFiles.length > 5) {
-        toast.error('You can upload a maximum of 5 images.');
+      const existingCount = imageUrls.split(',').map(url => url.trim()).filter(url => url).length;
+      if (existingCount + imageFiles.length + newFiles.length > 5) {
+        toast.error('You can upload a maximum of 5 images in total.');
         return;
       }
       setImageFiles(prev => [...prev, ...newFiles]);
@@ -181,20 +198,27 @@ export default function ProductsPage() {
     e.target.value = '';
   };
 
-  const removeImageFile = (index: number) => {
-    const newFiles = [...imageFiles];
-    newFiles.splice(index, 1);
-    setImageFiles(newFiles);
-    
-    const newPreviews = [...previewUrls];
-    URL.revokeObjectURL(newPreviews[index]); // Free memory
-    newPreviews.splice(index, 1);
-    setPreviewUrls(newPreviews);
+  const handleRemoveImage = (index: number) => {
+    const existingUrls = imageUrls.split(',').map(url => url.trim()).filter(url => url);
+    const existingCount = existingUrls.length;
+    if (index < existingCount) {
+      const newExisting = existingUrls.filter((_, i) => i !== index);
+      setImageUrls(newExisting.join(', '));
+    } else {
+      const fileIndex = index - existingCount;
+      const newFiles = [...imageFiles];
+      newFiles.splice(fileIndex, 1);
+      setImageFiles(newFiles);
+      
+      const newPreviews = [...previewUrls];
+      URL.revokeObjectURL(newPreviews[fileIndex]); // Free memory
+      newPreviews.splice(fileIndex, 1);
+      setPreviewUrls(newPreviews);
+    }
   };
 
-  const displayPreviewUrls = imageFiles.length > 0
-    ? previewUrls
-    : imageUrls.split(',').map((url) => url.trim()).filter((url) => url);
+  const existingUrls = imageUrls.split(',').map((url) => url.trim()).filter((url) => url);
+  const displayPreviewUrls = [...existingUrls, ...previewUrls];
 
   // Handle Submit
   const handleSubmit = async () => {
@@ -230,15 +254,27 @@ export default function ProductsPage() {
     formData.append('stock', String(stock));
     // We removed the global weight. Weight is now parsed through variants json.
 
-    // Convert comma separated images to array
+    // Convert comma separated images to array and clean absolute backend URL prefix
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/api.*$/, '') || 'http://localhost:5000';
     const imagesArray = imageUrls.split(',').map(url => url.trim()).filter(url => url);
-    imagesArray.forEach(url => formData.append('images', url));
+    const cleanImagesArray = imagesArray.map(url => {
+      if (url.startsWith(baseUrl)) {
+        return url.replace(baseUrl, '');
+      }
+      return url;
+    });
+
+    if (cleanImagesArray.length + imageFiles.length > 5) {
+      return toast.error("You can have a maximum of 5 images in total.");
+    }
+
+    cleanImagesArray.forEach(url => formData.append('images', url));
 
     if (imageFiles.length > 0) {
       imageFiles.forEach(file => {
         formData.append('imageFiles', file);
       });
-    } else if (imagesArray.length === 0) {
+    } else if (cleanImagesArray.length === 0) {
       formData.append('images', 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=100&auto=format&fit=crop');
     }
 
@@ -430,7 +466,7 @@ export default function ProductsPage() {
               <div>
                 <label className="block text-[14px] font-bold text-slate-900 mb-2.5">Category</label>
                 <div className="relative">
-                  <select value={category} onChange={e => setCategory(e.target.value)} className="w-full h-[50px] px-4 rounded-[12px] border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none text-[15px] text-slate-700">
+                  <select value={category} onChange={e => handleCategoryChange(e.target.value)} className="w-full h-[50px] px-4 rounded-[12px] border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none text-[15px] text-slate-700">
                     {dbCategories.filter(c => c.status === 'ACTIVE').map(c => (
                       <option key={c._id} value={c.name}>{c.name}</option>
                     ))}
@@ -583,7 +619,7 @@ export default function ProductsPage() {
                       <div key={index} className="relative aspect-square rounded-[8px] overflow-hidden border border-slate-200 group">
                         <img src={url} alt={`Preview ${index}`} className="w-full h-full object-cover" />
                         <button 
-                          onClick={() => removeImageFile(index)}
+                          onClick={() => handleRemoveImage(index)}
                           className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
